@@ -21,7 +21,7 @@ const GoogleLoginComponent = () => {
       window.gapi.load('auth2', () => {
         window.gapi.auth2
           .init({
-            client_id: 'YOUR_GOOGLE_CLIENT_ID',
+            client_id: 'Y951226780574-0dtiobp4up2jaump2f3doe79gum90j1j.apps.googleusercontent.com',
           })
           .then(() => {
             console.log('Google API initialized');

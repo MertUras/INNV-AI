@@ -67,8 +67,8 @@ function HeroSection({
             </div>
           </div>
         </div>
-        <div className='input-areas'>
-          <section className='footer-subscription'>
+      </div>
+     {/* <section className='footer-subscription'>
         <p className='footer-subscription-heading'>
           Üyelik Oluşturun
         </p>
@@ -76,7 +76,7 @@ function HeroSection({
           Abonelik listesi sizin kontrolünüzde
         </p>
        <div className='input-areas'>
-          -<form>
+          <form>
             <input
               className='footer-input'
               name='email'
@@ -102,10 +102,7 @@ function HeroSection({
             />
           </form>
         </div>
-      </section>
-        </div>
-
-      </div>
+      </section>*/}
     </>
   );
 }
