@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './Button.css'
 import './Button'
+
 const VideoRecorder = ({
   onVideoStop,
   onStopRecording,
@@ -13,6 +14,7 @@ const VideoRecorder = ({
   const [thinkingTime, setThinkingTime] = useState(60);
   const videoRef = useRef();
   const mediaRecorderRef = useRef();
+  const [recordedChunks, setRecordedChunks] = useState([]);
 
   useEffect(() => {
     if (showThinkingTime) {
@@ -39,6 +41,7 @@ const VideoRecorder = ({
     mediaRecorderRef.current = new MediaRecorder(stream);
 
     mediaRecorderRef.current.ondataavailable = (e) => {
+      setRecordedChunks((prev) => [...prev, e.data]);
       onVideoStop(e.data);
     };
 
@@ -54,6 +57,18 @@ const VideoRecorder = ({
     mediaRecorderRef.current.stop();
     videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
     onStopRecording();
+  };
+
+  const downloadVideo = () => {
+    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    document.body.appendChild(a);
+    a.style = 'display: none';
+    a.href = url;
+    a.download = 'recorded-video.webm';
+    a.click();
+    window.URL.revokeObjectURL(url);
   };
 
   const toggleRecording = () => {
@@ -72,6 +87,11 @@ const VideoRecorder = ({
       <button className='btn--medium btn--outline btn' onClick={toggleRecording}>
         {isRecording ? 'Stop Recording' : 'Start Recording'}
       </button>
+      {recordedChunks.length > 0 && (
+        <button className='btn--medium btn--outline btn' onClick={downloadVideo}>
+          Download Video
+        </button>
+      )}
     </div>
   );
 };

@@ -48,29 +48,25 @@ function Registration() {
               type='password'
               placeholder='Password'
             />
-            <Button buttonStyle='btn--outline'>Kayıt Ol</Button>
-            <div style={{ display: 'flex', alignItems: 'center', marginTop: '1rem' }}>
-              <GoogleLogin
-                clientId={clientId}
-                buttonText='Google ile Giriş Yap'
-                onSuccess={onSuccess}
-                onFailure={onFailure}
-                cookiePolicy={'single_host_origin'}
-                isSignedIn={loggedIn}
-                render={(renderProps) => (
-                  <Button
-                    buttonStyle='btn--outline'
-                    onClick={renderProps.onClick}
-                    disabled={renderProps.disabled}
-                  >
-                    Google ile Giriş Yap
-                  </Button>
-                )}
-              />
-              <button style={{ marginLeft: '1rem' }} onClick={handleGoogleLogin}>
-                Google ile Giriş Yap
-              </button>
-            </div>
+            <Button buttonStyle='btn--outline'>Kayıt</Button>
+            <GoogleLogin
+              clientId={clientId}
+              buttonText='Google ile Giriş Yap'
+              onSuccess={onSuccess}
+              onFailure={onFailure}
+              cookiePolicy={'single_host_origin'}
+              isSignedIn={loggedIn}
+              render={(renderProps) => (
+                <Button
+                  buttonStyle='btn--outline'
+                  onClick={renderProps.onClick}
+                  disabled={renderProps.disabled}
+                >
+                  Google ile Giriş Yap
+                </Button>
+              )}
+            />
+            <button onClick={handleGoogleLogin}>Google ile Giriş Yap</button>
           </form>
         </div>
       </section>
