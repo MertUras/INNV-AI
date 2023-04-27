@@ -7,7 +7,7 @@ import io
 import sys
 
 
-app = Flask(_name_)
+app = Flask(__name__)
 CORS(app, resources={r'/': {'origins': ''}})
 
 db_config = {
@@ -58,12 +58,10 @@ def get_all_participants():
     else:
         return jsonify({"error": "Could not connect to the database"}), 500
 
-
-UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = {'mp4'}
+UPLOAD_FOLDER = './uploads'
+ALLOWED_EXTENSIONS = {'webm'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -81,7 +79,13 @@ def save_video_response():
 
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        
+        # Create participant's folder or use existing folder
+        participant_folder = os.path.join(app.config['UPLOAD_FOLDER'], str(participant_id))
+        os.makedirs(participant_folder, exist_ok=True)
+        
+        file_path = os.path.join(participant_folder, filename)
+        file.save(file_path)
 
         connection = create_db_connection()
         if connection:
@@ -89,7 +93,7 @@ def save_video_response():
             cursor.execute("""
                 INSERT INTO video_responses (participant_id, question_id, video_response)
                 VALUES (%s, %s, LOAD_FILE(%s))
-            """, (participant_id, question_id, os.path.join(app.config['UPLOAD_FOLDER'], filename)))
+            """, (participant_id, question_id, file_path))
             connection.commit()
             cursor.close()
             connection.close()
@@ -98,54 +102,3 @@ def save_video_response():
             return jsonify({"error": "Could not connect to the database"}), 500
     else:
         return jsonify({"error": "Invalid file"}), 400
-
-
-@app.route('/api/video-response/<int:participant_id>/<int:question_id>', methods=['GET'])
-def get_video_response(participant_id, question_id):
-    connection = create_db_connection()
-    if connection:
-        cursor = connection.cursor()
-        cursor.execute("""
-            SELECT video_response
-            FROM video_responses
-            WHERE participant_id = %s AND question_id = %s
-        """, (participant_id, question_id))
-        video_response = cursor.fetchone()
-        cursor.close()
-        connection.close()
-        if video_response:
-            return send_file(io.BytesIO(video_response[0]), mimetype='video/mp4')
-        else:
-            return jsonify({"error": "Video response not found"}), 404
-    else:
-        return jsonify({"error": "Could not connect to the database"}), 500
-
-
-@app.route('/api/participants', methods=['POST'])
-def save_participant():
-    name = request.form.get('name')
-    email = request.form.get('email')
-
-    connection = create_db_connection()
-    if connection:
-        try:
-            cursor = connection.cursor()
-            cursor.execute("INSERT INTO participants (name, email) VALUES (%s, %s)", (name, email))
-            connection.commit()
-            cursor.close()
-            connection.close()
-
-            return jsonify({"id": cursor.lastrowid}), 201
-        except Exception as e:
-            print("Error saving participant:", e, file=sys.stderr)
-            return jsonify({"error": str(e)}), 500
-    else:
-        return jsonify({"error": "Could not connect to the database"}), 500
-
-@app.route('/', methods=['GET'])
-def home():
-    return jsonify({'message': 'Welcome to the Emotion Recognition API!'})
-
-
-if _name_ == '_main_':
-    app.run(debug=True)

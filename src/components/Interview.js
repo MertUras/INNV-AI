@@ -3,6 +3,7 @@ import './Interview.css';
 import './Button.css'
 import './Button'
 import VideoRecorder from './VideoRecorder';
+import axios from 'axios';
 
 function App() {
   const [questionIndex, setQuestionIndex] = useState(0);
@@ -21,8 +22,23 @@ function App() {
     "Describe a time when you had to make a tough decision with limited information.",
     "'What are your long-term career goals and how do you plan to achieve them?",
     // Add the rest of the questions here
-  
+
   ];
+  const handleNextQuestion = () => {
+    if (questionIndex < questions.length - 1) {
+      setQuestionIndex(questionIndex + 1);
+      setVideoBlob(null);
+      setShowThinkingTime(true);
+    }
+  };
+
+  const handlePreviousQuestion = () => {
+    if (questionIndex > 0) {
+      setQuestionIndex(questionIndex - 1);
+      setVideoBlob(null);
+      setShowThinkingTime(true);
+    }
+  };
 
   const onVideoStop = (blob) => {
     setVideoBlob(blob);
@@ -43,23 +59,39 @@ function App() {
   const onRecordingStarted = () => {
     setShowThinkingTime(false);
   };
+  const saveVideoResponse = async (videoBlob, participantId, questionId) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", new File([videoBlob], `question_${questionId}.mp4`));
+      formData.append("participant_id", participantId);
+      formData.append("question_id", questionId);
 
+      const response = await axios.post("http://localhost:5000/api/video-response", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log("Video saved:", response);
+    } catch (error) {
+      console.error("Error saving video:", error);
+    }
+  };
   return (
     <div className="App">
-            <header className="App-header">
+      <header className="App-header">
         <h1>Video Interview</h1>
       </header>
       <h1>{questions[questionIndex]}</h1>
       <VideoRecorder
         onVideoStop={onVideoStop}
         onStopRecording={onStopRecording}
-        onNextQuestion={onNextQuestion}
+        onNextQuestion={handleNextQuestion}
+        onPreviousQuestion={handlePreviousQuestion}
         onRecordingStarted={onRecordingStarted}
+        saveVideoResponse={saveVideoResponse}
         showThinkingTime={showThinkingTime}
       />
-      <button className='btn--medium btn--outline btn' onClick={onNextQuestion} disabled={!videoBlob}>
-        Next Question
-      </button>
+
     </div>
   );
 }

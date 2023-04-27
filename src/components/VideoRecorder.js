@@ -6,6 +6,7 @@ const VideoRecorder = ({
   onVideoStop,
   onStopRecording,
   onNextQuestion,
+  onPreviousQuestion,
   onRecordingStarted,
   showThinkingTime,
 }) => {
@@ -81,17 +82,24 @@ const VideoRecorder = ({
 
   return (
     <div>
-      <video ref={videoRef} autoPlay muted />
+           <video ref={videoRef} autoPlay muted />
       {showThinkingTime && !isRecording && <p>Thinking time: {thinkingTime}s</p>}
       <p>{isRecording ? `Recording time: ${recordingTime}s` : ''}</p>
       <button className='btn--medium btn--outline btn' onClick={toggleRecording}>
         {isRecording ? 'Stop Recording' : 'Start Recording'}
+      </button>
+<button className='btn--medium btn--outline btn' onClick={onPreviousQuestion}>
+        Previous Question
+      </button>
+      <button className='btn--medium btn--outline btn' onClick={onNextQuestion}>
+        Next Question
       </button>
       {recordedChunks.length > 0 && (
         <button className='btn--medium btn--outline btn' onClick={downloadVideo}>
           Download Video
         </button>
       )}
+      
     </div>
   );
 };
